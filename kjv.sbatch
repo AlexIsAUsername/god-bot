@@ -12,9 +12,6 @@ module purge
 module load openmpi/4.0.3-gcc-8.5.0
 
 
-## compile your code
-mpicc Random.c pi_mc.c -o proj06.mpi -lm -fopenmp
-
 # Fix your environment
 export OMPI_MCA_pml="^ucx"
 export OMPI_MCA_btl_openib_if_include="mlx4_0:1"
