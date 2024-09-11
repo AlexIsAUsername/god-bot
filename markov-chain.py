@@ -1,33 +1,71 @@
 import markovify
 import os
 import numpy
+import random
+import time
+
 
 input_file = "kjvc.txt"
+chain_order = 4 # 4 is the magic number
 
 
 
 def get_last_n(lst, n):
     return lst[-n:]
 
-def userPrompt(corpus: list[str]) -> str:
-    dirty_input = input("Enter prompt: ")
+
+def find_closest_word(bad_word: str, corpus: list[str]):
+    
+    corpus = list(corpus)
+    
+    closest_words = []
+    
+    shortest_dist = 999 # init with high value
+    
+    for cur_word in corpus:
+        cur_dist = levenshteinDistanceDP(bad_word, cur_word)
+        
+        if cur_dist < shortest_dist:
+            closest_words = [] # clear currest best words
+            shortest_dist = cur_dist
+            closest_words.append(cur_word)
+        elif cur_dist == shortest_dist:
+            closest_words.append(cur_word)
+            
+    return random.choice(closest_words)
+    
+        
+
+def get_user_prompt(corpus: list[str]) -> str:
+    dirty_input = input("Enter prompt: ").split(" ")
     
     
     bad_words = []
     for word in dirty_input:
-        if bad_words not in corpus:
+        if word not in corpus:
             bad_words.append(word)
 
-
+    
     good_words = []
     for word in bad_words:
-        good_words.append(findClosestWord(word))
+        good_words.append(find_closest_word(word, corpus))
     
     
-    for i in enumerate(good_words):
-        dirty_input = dirty_input.replace(bad_words[i], good_words[i])
+    cleaned_input = []
+    
+    index_in_good = 0
+    
+    for i in range(len(dirty_input)):
+        if dirty_input[i] in bad_words:
+            cleaned_input.append(good_words[index_in_good])
+            index_in_good += 1
+        else:
+            cleaned_input.append(dirty_input[i])
+    
+    print(cleaned_input)
+    
+    return " ".join(cleaned_input)
 
-    return dirty_input
 
 
 def response(model: markovify.Text, prompt: str):
@@ -78,26 +116,47 @@ def levenshteinDistanceDP(token1, token2):
     return distances[len(token1)][len(token2)]
 
 
+def inject_prompt(prompt: str, the_bible: str) -> str:
+    
+    prompt += " amen"
+    bible_words = the_bible.split(".")
+    index = random.randrange(len(bible_words))
+    
+    bible_words.insert(index, prompt)
+    
+    return ". ".join(bible_words)
+    
+    
+# print(inject_prompt("god satan", "sentence sen. sentency sentecner. sentern."))
+
 
 def main():
     global input_file
 
-    chain_order = 2
 
     with open(input_file) as f:
-        the_bible = f.read().replace("\n", " ",-1).replace("—", "", -1).replace("!","",-1).replace(")","",-1).replace("(","",-1).replace("?","",-1).lower()
+        the_bible = f.read().replace("\n", " ",-1)
 
 
-    text_model = markovify.Text(the_bible, state_size=chain_order)
 
     corpus = set(the_bible.replace(".","", -1).split(" "))
-    print(corpus)
+    # print(corpus)
 
 
     while True:
-        prompt = userPrompt()
+        prompt = get_user_prompt(corpus)
+        
+        # print("Prompt: " + prompt)
+        # time.sleep(2)
+        # print(the_bible)
+        
+        
+        text_model = markovify.Text((prompt + " amen. " + the_bible), state_size=chain_order)
+        # print("he")
         res = response(text_model, prompt)
-        print(res)
+        
+        cleaned_output = ""
+        print(" ".join(res.split(" ")[(chain_order + 10):]))
 
 if __name__ == "__main__":
     main()

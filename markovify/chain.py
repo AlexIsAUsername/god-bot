@@ -128,7 +128,7 @@ class Chain:
         state = init_state or (BEGIN,) * self.state_size
         # while True:
         # TODO make variable
-        for i in range(30):
+        for i in range(50):
             next_word = self.move(state)
             if next_word == END:
                 break

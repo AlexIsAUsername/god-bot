@@ -42,6 +42,7 @@ for line in cleaned_bible_lines:
     clean.write(line)
 
 
+
 clean.close()
 
 print("got here")
