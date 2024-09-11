@@ -1,5 +1,5 @@
 import markovify
-import os
+import sys
 import numpy
 import random
 import time
@@ -126,8 +126,12 @@ def inject_prompt(prompt: str, the_bible: str) -> str:
     
     return ". ".join(bible_words)
     
-    
-# print(inject_prompt("god satan", "sentence sen. sentency sentecner. sentern."))
+def printer(text: str) -> None:
+    for char in text:
+        print(char, end="", flush=True)
+        time.sleep(0.05)
+
+    print() # newline
 
 
 def main():
@@ -140,23 +144,16 @@ def main():
 
 
     corpus = set(the_bible.replace(".","", -1).split(" "))
-    # print(corpus)
 
 
     while True:
         prompt = get_user_prompt(corpus)
         
-        # print("Prompt: " + prompt)
-        # time.sleep(2)
-        # print(the_bible)
-        
-        
         text_model = markovify.Text((prompt + " amen. " + the_bible), state_size=chain_order)
         # print("he")
         res = response(text_model, prompt)
         
-        cleaned_output = ""
-        print(" ".join(res.split(" ")[(chain_order + 10):]))
+        printer(" ".join(res.split(" ")[(chain_order + 10):]))
 
 if __name__ == "__main__":
     main()
