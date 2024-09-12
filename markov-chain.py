@@ -34,9 +34,20 @@ def find_closest_word(bad_word: str, corpus: list[str]):
     return random.choice(closest_words)
 
 
-def get_user_prompt(corpus: list[str]) -> str:
-    set_corpus = set(corpus)
-    dirty_input = input("Enter prompt: ").strip().split(" ")
+def get_user_prompt(the_bible: str) -> str:
+    global chain_order
+    set_corpus = set(the_bible.replace(".", "", -1).split(" "))
+    full_dirty_input = input("Enter prompt: ")
+    punc = ["[", "]", ":", ",", ";", "’", "—", "!", "(", ")", "?"]
+    for mark in punc:
+        full_dirty_input = full_dirty_input.replace(mark, "", -1)
+    full_dirty_input = full_dirty_input.strip().split(" ")
+    dirty_input = []
+
+    if len(full_dirty_input) > chain_order:
+        dirty_input = full_dirty_input[len(full_dirty_input) - chain_order :]
+    else:
+        dirty_input = full_dirty_input
 
     bad_words = []
     for word in dirty_input:
@@ -59,7 +70,8 @@ def get_user_prompt(corpus: list[str]) -> str:
             cleaned_input.append(dirty_input[i])
 
     # after levinsteine search
-    temp = find_prompt_chain(corpus, cleaned_input)
+    print("Cleaned input: ", cleaned_input)
+    temp = find_prompt_chain(the_bible.split(" "), cleaned_input)
     print("Final prompt: ", temp)
     return " ".join(temp)
 
@@ -94,16 +106,16 @@ def permutations(elements):
 
 
 def find_prompt_chain(corpus: list[str], cleaned_input: list[str]):
-    # final_prompt = temp_prompt = []
-    # permutated_input_list = list(permutations(cleaned_input))
-    # for permutated_input in permutated_input_list:
-    #     temp_prompt = convolve_lists(corpus, permutated_input)
-    #     if len(temp_prompt) > len(final_prompt):
-    #         final_prompt = temp_prompt
-    #         if len(final_prompt) == len(cleaned_input):
-    #             return final_prompt
-    # return final_prompt
-    return convolve_lists(corpus, cleaned_input)
+    final_prompt = temp_prompt = []
+    permutated_input_list = list(permutations(cleaned_input))
+    for permutated_input in permutated_input_list:
+        temp_prompt = convolve_lists(corpus, permutated_input)
+        if len(temp_prompt) > len(final_prompt):
+            final_prompt = temp_prompt
+            if len(final_prompt) == len(cleaned_input):
+                return final_prompt
+    return final_prompt
+    # return convolve_lists(corpus, cleaned_input)
 
 
 def response(model: markovify.Text, prompt: str):
@@ -154,7 +166,9 @@ def levenshteinDistanceDP(token1, token2):
     return distances[len(token1)][len(token2)]
 
 
-def inject_prompt(prompt: str, the_bible: str) -> str:
+def inject_prompt(
+    prompt: str, the_bible: str
+) -> str:  # TODO decide if its worth killing
 
     prompt += " amen"
     bible_words = the_bible.split(".")
@@ -169,7 +183,7 @@ def inject_prompt(prompt: str, the_bible: str) -> str:
 def printer(text: str) -> None:
     for char in text:
         print(char, end="", flush=True)
-        # time.sleep(0.05)
+        time.sleep(0.05)
 
     print()  # newline
 
@@ -180,19 +194,16 @@ def main():
     with open(input_file) as f:
         the_bible = f.read().replace("\n", " ", -1)
 
-    corpus = the_bible.replace(".", "", -1).split(" ")
-
     while True:
-        prompt = get_user_prompt(corpus)
+        prompt = get_user_prompt(the_bible)
 
         text_model = markovify.Text(
             the_bible,
             state_size=min(chain_order, len(prompt.split(" "))),
         )
-        # print("he")
         res = response(text_model, prompt)
 
-        printer(" ".join(res.split(" ")))  # [(chain_order + 10):]))
+        printer(" ".join(res.split(" ")))
 
 
 if __name__ == "__main__":
