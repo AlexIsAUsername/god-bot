@@ -37,7 +37,7 @@ def find_closest_word(bad_word: str, corpus: list[str]):
         
 
 def get_user_prompt(corpus: list[str]) -> str:
-    dirty_input = input("Enter prompt: ").split(" ")
+    dirty_input = input("Enter prompt: ").strip().split(" ")
     
     
     bad_words = []
