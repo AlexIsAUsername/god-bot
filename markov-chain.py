@@ -1,5 +1,6 @@
+from gtts import gTTS
 import markovify
-import sys
+import vlc
 import numpy
 import random
 import time
@@ -202,7 +203,10 @@ def main():
             state_size=min(chain_order, len(prompt.split(" "))),
         )
         res = response(text_model, prompt)
-
+        tts = gTTS(text=res, lang="en", slow=False)
+        tts.save("god.mp3")
+        p = vlc.MediaPlayer("god.mp3")
+        p.play()
         printer(" ".join(res.split(" ")))
 
 
