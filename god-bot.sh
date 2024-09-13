@@ -1,3 +1,4 @@
+#!/bin/bash
 
 mkdir -p temp
 
@@ -8,15 +9,12 @@ if [ ! -f "$TARGET" ]; then
     python3 scripts/kjv-clean.py
 fi
 
-python3 -m venv venv
+python3 -m venv venv 
 
 source venv/bin/activate
 
-pip install -r requirements.txt
+pip install -r requirements.txt >/dev/null
 
-
-python3 src/markov-chain.py
+python3 src/markov-chain.py $1
 
 rm -rf temp
-
-deactivate

@@ -4,13 +4,25 @@ import vlc
 import numpy
 import random
 import time
+import sys
+
 from logger import Logger, LoggerConfig
+from conf import load_config, Config
 
-logger = Logger(LoggerConfig.DEBUG)
+conf: Config = load_config(None if len(sys.argv) == 1 else sys.argv[1])
+
+logger_mode = None
+if conf.get("debug_mode"):
+    logger_mode = LoggerConfig.DEBUG
+else:
+    logger_mode = LoggerConfig.NONE
 
 
-input_file = "input/kjvc.txt"
-chain_order = 4  # 4 is the magic number
+logger = Logger(logger_mode)
+
+
+input_file = conf.get("source_text")
+chain_order = conf.get("chain_order")  # 4 is the magic number
 
 def permutations(elements):
     """permutations function taken from https://stackoverflow.com/a/104436
@@ -85,6 +97,10 @@ def get_user_prompt(the_bible: str) -> str:
     # makes a set of all the words in the_bible
     set_corpus = set(the_bible.replace(".", "", -1).split(" "))
     full_dirty_input = input("Enter prompt: ")
+    
+    if full_dirty_input.lower() == "exit":
+        sys.exit(0)
+
     punc = ["[", "]", ":", ",", ";", "’", "—", "!", "(", ")", "?"]
     # strips the input of punctuation
     for mark in punc:
@@ -243,11 +259,13 @@ def printer(text: str) -> None:
     print()  # newline
 
 
-def main():
+def run_god_bot():    
+    
     with open(input_file) as f:
         the_bible = f.read().replace("\n", " ", -1)
 
     curr_state_size = 0
+    prompt = ""
     while True:
         prompt = get_user_prompt(the_bible)
 
@@ -261,10 +279,14 @@ def main():
             curr_state_size = next_state_size
 
         res = response(text_model, prompt)
-        gTTS(text=res, lang="en", slow=False).save("temp/god.mp3") # properties of the text to speech audio file and save
+        gTTS(text=res, lang=conf.get("tts_language"), slow=False).save("temp/god.mp3") # properties of the text to speech audio file and save
         vlc.MediaPlayer("temp/god.mp3").play() # play the generated audio file
         printer(" ".join(res.split(" ")))
 
 
 if __name__ == "__main__":
-    main()
+    
+    try:
+        run_god_bot()
+    except KeyboardInterrupt:
+        print("\nExiting...")

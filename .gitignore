@@ -3,3 +3,4 @@ venv/
 **/__pycache__/
 god.mp3
 env/
+temp/

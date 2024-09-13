@@ -1,0 +1,6 @@
+{
+    "tts_language": "ru",
+    "chain_order": 3,
+    "debug_mode": true,
+    "source_text": "input/kjvc.txt"
+}
