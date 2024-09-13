@@ -4,8 +4,12 @@ import vlc
 import numpy
 import random
 import time
+from logger import Logger, LoggerConfig
 
-input_file = "kjvc.txt"
+logger = Logger(LoggerConfig.DEBUG)
+
+
+input_file = "input/kjvc.txt"
 chain_order = 4  # 4 is the magic number
 
 def permutations(elements):
@@ -78,7 +82,6 @@ def get_user_prompt(the_bible: str) -> str:
     Returns:
         str: fully cleaned initial state for markovify
     """
-    global chain_order
     # makes a set of all the words in the_bible
     set_corpus = set(the_bible.replace(".", "", -1).split(" "))
     full_dirty_input = input("Enter prompt: ")
@@ -121,9 +124,9 @@ def get_user_prompt(the_bible: str) -> str:
             cleaned_input.append(dirty_input[i])
 
     # returns longest chain of fully cleaned input
-    print("Cleaned input: ", cleaned_input)
+    logger.debug("Cleaned input: ", cleaned_input)
     temp = find_prompt_chain(the_bible.split(" "), cleaned_input) # finds longest chain of cleaned_input
-    print("Final prompt: ", temp)
+    logger.debug("Final prompt: ", temp)
     return " ".join(temp)
 
 
@@ -191,7 +194,6 @@ def convolve_lists(corpus: list[str], cleaned_input: list[str]) ->list[str]:
     Returns:
         list[str]: longest chain of cleaned_input in corpus
     """
-    global chain_order
     reversed_input = []
     max = count = 0
     for i in range(len(cleaned_input) - 1, -1, -1):
@@ -219,11 +221,10 @@ def response(model: markovify.Text, prompt: str) -> str:
     Returns:
         str: response from the markov chain
     """
-    global chain_order
 
     if len(prompt) > 0:
         temp = tuple(prompt.split(" "))
-        print("Initial state: ", temp)
+        logger.debug("Initial state: ", temp)
         return model.make_sentence(init_state=temp)
         # return model.make_sentence_with_start(real_prompt, strict=False)
     else:
@@ -243,8 +244,6 @@ def printer(text: str) -> None:
 
 
 def main():
-    global input_file
-
     with open(input_file) as f:
         the_bible = f.read().replace("\n", " ", -1)
 
@@ -262,8 +261,8 @@ def main():
             curr_state_size = next_state_size
 
         res = response(text_model, prompt)
-        gTTS(text=res, lang="en", slow=False).save("god.mp3") # properties of the text to speech audio file and save
-        vlc.MediaPlayer("god.mp3").play() # play the generated audio file
+        gTTS(text=res, lang="en", slow=False).save("temp/god.mp3") # properties of the text to speech audio file and save
+        vlc.MediaPlayer("temp/god.mp3").play() # play the generated audio file
         printer(" ".join(res.split(" ")))
 
 

@@ -1,7 +1,7 @@
 
 striped_bible_lines = []
 
-with open("kjv.txt", "r") as f:
+with open("input/kjv.txt", "r") as f:
     lines = f.readlines()
     
     for line in lines:     
@@ -34,7 +34,7 @@ for line in striped_bible_lines:
 
     cleaned_bible_lines.append(temp_line)
 
-clean = open("kjvc.txt","w")
+clean = open("input/kjvc.txt","w")
 
 
 
@@ -45,4 +45,3 @@ for line in cleaned_bible_lines:
 
 clean.close()
 
-print("got here")
