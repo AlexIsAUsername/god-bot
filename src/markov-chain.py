@@ -9,7 +9,6 @@ import sys
 
 from logger import Logger, LoggerConfig
 from conf import load_config, Config
-    
 
 
 try:
@@ -26,12 +25,12 @@ else:
     logger_mode = LoggerConfig.NONE
 
 
-
 logger = Logger(logger_mode)
 
 
 input_file = conf.get("source_text")
 chain_order = conf.get("chain_order")  # 4 is the magic number
+
 
 def permutations(elements):
     """permutations function taken from https://stackoverflow.com/a/104436
@@ -93,8 +92,8 @@ def levenshteinDistanceDP(token1, token2):
 
 
 def get_user_prompt(the_bible: str) -> str:
-    """gets user input and cleans it by removing punctuation, 
-    converting the input to words in the_bible (uses find_closest_word), 
+    """gets user input and cleans it by removing punctuation,
+    converting the input to words in the_bible (uses find_closest_word),
     and the longest contiguous string of those words in the_bible (uses find_prompt_chain)
 
     Args:
@@ -106,7 +105,7 @@ def get_user_prompt(the_bible: str) -> str:
     # makes a set of all the words in the_bible
     set_corpus = set(the_bible.replace(".", "", -1).split(" "))
     full_dirty_input = input("Enter prompt: ")
-    
+
     if full_dirty_input.lower() == "exit":
         sys.exit(0)
 
@@ -115,7 +114,7 @@ def get_user_prompt(the_bible: str) -> str:
     for mark in punc:
         full_dirty_input = full_dirty_input.replace(mark, "", -1)
     full_dirty_input = full_dirty_input.strip().split(" ")
-    
+
     dirty_input = []
 
     # keeps only the last chain_order number of words from the input
@@ -125,17 +124,19 @@ def get_user_prompt(the_bible: str) -> str:
         dirty_input = full_dirty_input
 
     bad_words = []
-    
+
     # tracks all words that are not in the_bible
     for word in dirty_input:
         if word not in set_corpus:
             bad_words.append(word)
 
     good_words = []
-    
+
     # tracks all the closest replacement words for bad_words from the words in the_bible
     for word in bad_words:
-        good_words.append(find_closest_word(word, set_corpus))# levenshtein Distance search the closest words in the bible
+        good_words.append(
+            find_closest_word(word, set_corpus)
+        )  # levenshtein Distance search the closest words in the bible
 
     cleaned_input = []
     index_in_good = 0
@@ -150,7 +151,9 @@ def get_user_prompt(the_bible: str) -> str:
 
     # returns longest chain of fully cleaned input
     logger.debug("Cleaned input: ", cleaned_input)
-    temp = find_prompt_chain(the_bible.split(" "), cleaned_input) # finds longest chain of cleaned_input
+    temp = find_prompt_chain(
+        the_bible.split(" "), cleaned_input
+    )  # finds longest chain of cleaned_input
     logger.debug("Final prompt: ", temp)
     return " ".join(temp)
 
@@ -185,8 +188,8 @@ def find_closest_word(bad_word: str, corpus: list[str]) -> str:
     return random.choice(closest_words)
 
 
-def find_prompt_chain(corpus: list[str], cleaned_input: list[str])-> list[str]:
-    """permutes the list of cleaned_input to find the longest contiguous chain 
+def find_prompt_chain(corpus: list[str], cleaned_input: list[str]) -> list[str]:
+    """permutes the list of cleaned_input to find the longest contiguous chain
     that appears in corpus with a preference for the original cleaned_input
 
     Args:
@@ -208,8 +211,8 @@ def find_prompt_chain(corpus: list[str], cleaned_input: list[str])-> list[str]:
     # return convolve_lists(corpus, cleaned_input)
 
 
-def convolve_lists(corpus: list[str], cleaned_input: list[str]) ->list[str]:
-    """performs convolution on corpus and cleaned_input to determine the 
+def convolve_lists(corpus: list[str], cleaned_input: list[str]) -> list[str]:
+    """performs convolution on corpus and cleaned_input to determine the
     longest contiguous chain of cleaned_input that appears in corpus
 
     Args:
@@ -268,8 +271,8 @@ def printer(text: str) -> None:
     print()  # newline
 
 
-def run_god_bot():    
-    
+def run_god_bot():
+
     with open(input_file) as f:
         the_bible = f.read().replace("\n", " ", -1)
 
@@ -280,7 +283,7 @@ def run_god_bot():
 
         # determine the next state size and only recompute markov chain if its different
         next_state_size = min(chain_order, len(prompt.split(" ")))
-        if(curr_state_size != next_state_size):
+        if curr_state_size != next_state_size:
             text_model = markovify.Text(
                 the_bible,
                 state_size=next_state_size,
@@ -288,13 +291,15 @@ def run_god_bot():
             curr_state_size = next_state_size
 
         res = response(text_model, prompt)
-        gTTS(text=res, lang=conf.get("tts_language"), slow=False).save("temp/god.mp3") # properties of the text to speech audio file and save
-        vlc.MediaPlayer("temp/god.mp3").play() # play the generated audio file
+        gTTS(text=res, lang=conf.get("tts_language"), slow=False).save(
+            "temp/god.mp3"
+        )  # properties of the text to speech audio file and save
+        vlc.MediaPlayer("temp/god.mp3").play()  # play the generated audio file
         printer(" ".join(res.split(" ")))
 
 
 if __name__ == "__main__":
-    
+
     try:
         run_god_bot()
     except KeyboardInterrupt:
