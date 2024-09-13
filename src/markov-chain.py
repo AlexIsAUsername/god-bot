@@ -4,18 +4,27 @@ import vlc
 import numpy
 import random
 import time
+import json
 import sys
 
 from logger import Logger, LoggerConfig
 from conf import load_config, Config
+    
 
-conf: Config = load_config(None if len(sys.argv) == 1 else sys.argv[1])
+
+try:
+    conf: Config = load_config(None if len(sys.argv) == 1 else sys.argv[1])
+except json.decoder.JSONDecodeError:
+    print("Bad configuration file D:")
+    sys.exit(1)
+
 
 logger_mode = None
 if conf.get("debug_mode"):
     logger_mode = LoggerConfig.DEBUG
 else:
     logger_mode = LoggerConfig.NONE
+
 
 
 logger = Logger(logger_mode)
