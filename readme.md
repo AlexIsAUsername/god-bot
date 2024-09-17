@@ -14,34 +14,38 @@
 </p>
 
 ## What is god bot?
+
 A markov-chain based chatbot that defaults to the king james bible.
 
 ## Examples
-<p align="center">
-<iframe width="560" height="315" src="https://www.youtube.com/embed/Dxpyd6hF4N8?si=jIEDhiOSUG8y4HzN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</p>
+
+[![YouTube](http://i.ytimg.com/vi/Dxpyd6hF4N8/hqdefault.jpg)](https://www.youtube.com/watch?v=Dxpyd6hF4N8)
 
 ## Getting started
+
 To get started using god-bot, run the following script.
+
 ```bash
 git clone git@github.com:AlexIsAUsername/god-bot.git
 ./god-bot.sh
 ```
+
 Optionally a config file can be passed in
 `./god-bot.sh input/conf.json`
 The config file may look something like
+
 ```json
 {
-    "tts_language": "ru",
-    "chain_order": 3,
-    "debug_mode": true,
-    "source_text": "input/kjvc.txt"
+  "tts_language": "ru",
+  "chain_order": 3,
+  "debug_mode": true,
+  "source_text": "input/kjvc.txt"
 }
 ```
 
-|option|description|constraints|
-|---|---|---|
-tts_language|the accent of god bot|any language specified in [language.py](src/language.py)|
-chain_order|the maximum context the markov chain will use|1-4 is best, your results may vary|
-debug_mode|print debug values to the console|true/false
-source_text|the information fed to god bot|a text file stripped of all punctuation except periods
+| option       | description                                   | constraints                                              |
+| ------------ | --------------------------------------------- | -------------------------------------------------------- |
+| tts_language | the accent of god bot                         | any language specified in [language.py](src/language.py) |
+| chain_order  | the maximum context the markov chain will use | 1-4 is best, your results may vary                       |
+| debug_mode   | print debug values to the console             | true/false                                               |
+| source_text  | the information fed to god bot                | a text file stripped of all punctuation except periods   |
